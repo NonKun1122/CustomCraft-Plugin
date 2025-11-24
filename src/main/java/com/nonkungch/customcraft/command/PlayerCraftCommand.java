@@ -1,17 +1,17 @@
-package nonkungch.customcraft.command;
+package com.nonkungch.customcraft.command;
 
-import nonkungch.customcraft.CustomCraft;
-import nonkungch.customcraft.gui.PlayerCraftingGUI;
-import nonkungch.customcraft.util.ChatUtil;
+import com.nonkungch.customcraft.CustomCraft; 
+import com.nonkungch.customcraft.gui.PlayerCraftingGUI;
+import com.nonkungch.customcraft.util.ChatUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class PlayerCraftCommand implements CommandExecutor {
-    private final CustomCraft plugin;
+    private final CustomCraft plugin; 
 
-    public PlayerCraftCommand(CustomCraft plugin) {
+    public PlayerCraftCommand(CustomCraft plugin) { 
         this.plugin = plugin;
     }
 
@@ -30,4 +30,4 @@ public class PlayerCraftCommand implements CommandExecutor {
         PlayerCraftingGUI.openRecipeSelectionGUI(player, plugin.getRecipeManager().getRecipes()); 
         return true;
     }
-              }
+}
