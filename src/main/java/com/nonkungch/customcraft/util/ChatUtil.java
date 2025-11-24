@@ -8,3 +8,4 @@ public class ChatUtil {
         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[CustomCraft] " + message));
     }
 }
+
