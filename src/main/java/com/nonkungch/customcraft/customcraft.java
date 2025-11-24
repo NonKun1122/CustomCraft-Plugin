@@ -1,4 +1,4 @@
-package com.nonkungch.customcraft; 
+package com.nonkungch.customcraft;
 
 import com.nonkungch.customcraft.command.AdminRecipeCommand;
 import com.nonkungch.customcraft.command.PlayerCraftCommand;
@@ -10,7 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class CustomCraft extends JavaPlugin {
 
-    private static NonkungchCustomCraft instance;
+    private static CustomCraft instance;
     private RecipeManager recipeManager;
 
     @Override
@@ -37,11 +37,11 @@ public class CustomCraft extends JavaPlugin {
         getLogger().info("[CustomCraft] Plugin Disabled.");
     }
 
-    public static NonkungchCustomCraft getInstance() {
+    public static CustomCraft getInstance() {
         return instance;
     }
 
     public RecipeManager getRecipeManager() {
         return recipeManager;
     }
-    }
+}
