@@ -32,7 +32,7 @@ public class ItemSerializer {
             dataInput.close();
             return item;
         } catch (ClassNotFoundException | IOException e) {
-            return null; // คืนค่า null หาก deserialize ไม่ได้ (อาจเกิดจากการเปลี่ยนเวอร์ชัน)
+            return null; 
         }
     }
 }
