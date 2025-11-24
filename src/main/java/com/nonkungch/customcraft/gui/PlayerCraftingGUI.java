@@ -1,6 +1,6 @@
 package com.nonkungch.customcraft.gui;
 
-import vom.nonkungch.customcraft.model.CustomRecipe;
+import com.nonkungch.customcraft.model.CustomRecipe;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -17,7 +17,6 @@ public class PlayerCraftingGUI {
     public static final String MENU_TITLE = ChatColor.BLUE + "Custom Recipe Menu";
     public static final String DETAIL_TITLE_PREFIX = ChatColor.DARK_GREEN + "Craft: ";
     
-    // ช่องสำหรับส่วนผสมใน GUI คราฟต์ (12 ช่อง)
     public static final Integer[] INPUT_SLOTS = {10, 11, 12, 19, 20, 21, 28, 29, 30, 37, 38, 39}; 
     public static final int RESULT_DISPLAY_SLOT = 24; 
     public static final int CRAFT_BUTTON_SLOT = 43; 
@@ -29,7 +28,6 @@ public class PlayerCraftingGUI {
         for (CustomRecipe recipe : recipes) {
             if (slot >= 54) break;
             
-            // ใช้ไอเท็มผลลัพธ์ แต่ถ้าเป็น null ให้ใช้ BOOK แทน
             ItemStack item = recipe.getResult() != null ? recipe.getResult().clone() : new ItemStack(Material.BOOK);
             ItemMeta meta = item.getItemMeta();
             
@@ -52,7 +50,6 @@ public class PlayerCraftingGUI {
         
         ItemStack border = createBorderItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         for (int i = 0; i < 54; i++) {
-            // ป้องกันช่อง Input/Output/Button
             if (!isCraftingSlot(i)) {
                 gui.setItem(i, border);
             }
@@ -64,7 +61,6 @@ public class PlayerCraftingGUI {
         
         for (int i = 0; i < INPUT_SLOTS.length; i++) {
             ItemStack ingredient = recipe.getIngredients().get(i);
-            // แสดงไอเท็มตัวอย่างในช่อง Input
             gui.setItem(INPUT_SLOTS[i], ingredient != null ? ingredient.clone() : null); 
         }
         
@@ -105,5 +101,4 @@ public class PlayerCraftingGUI {
         item.setItemMeta(meta);
         return item;
     }
-        }
-                        
+}
