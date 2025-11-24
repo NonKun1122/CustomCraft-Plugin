@@ -1,14 +1,13 @@
 package com.nonkungch.customcraft.util;
 
-import com.nonkungch.customcraft.CustomCraft;
+import com.nonkungch.customcraft.CustomCraft; 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Recipe;
 import java.util.Iterator;
 
 public class RecipeRemover {
     
-    public static void removeVanillaRecipes(CustomCraft plugin) {
-        // ใช้ String array เพื่อรองรับชื่อ Material ที่อาจเปลี่ยนไปในแต่ละเวอร์ชัน
+    public static void removeVanillaRecipes(CustomCraft plugin) { 
         String[] materialsToRemove = {
             "IRON_INGOT", "IRON_BLOCK", "IRON_SWORD", "IRON_PICKAXE", "IRON_AXE", "IRON_CHESTPLATE",
             "GOLD_INGOT", "GOLD_BLOCK", "GOLDEN_SWORD", "GOLDEN_PICKAXE",
