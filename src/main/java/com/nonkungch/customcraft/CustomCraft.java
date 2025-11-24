@@ -1,10 +1,10 @@
 package com.nonkungch.customcraft; 
 
-import nonkungch.customcraft.command.AdminRecipeCommand;
-import nonkungch.customcraft.command.PlayerCraftCommand;
-import nonkungch.customcraft.gui.GUIHandler;
-import nonkungch.customcraft.manager.RecipeManager;
-import nonkungch.customcraft.util.RecipeRemover;
+import com.nonkungch.customcraft.command.AdminRecipeCommand;
+import com.nonkungch.customcraft.command.PlayerCraftCommand;
+import com.nonkungch.customcraft.gui.GUIHandler;
+import com.nonkungch.customcraft.manager.RecipeManager;
+import com.nonkungch.customcraft.util.RecipeRemover;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
