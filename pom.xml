@@ -5,13 +5,16 @@
          https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.nonkungch</groupId>
-    <artifactId>RealisticFire</artifactId>
-    <version>0.0</version>
+    <artifactId>CustomCraft-Plugin</artifactId>
+    <version>1.0</version>
     <packaging>jar</packaging>
+
+    <name>NonkungchCustomCraft</name>
+    <description>A custom crafting plugin with admin GUI and time delay, by nonkungch.</description>
 
     <properties>
         <java.version>17</java.version>
-        <spigot.version>1.21.1-R0.1-SNAPSHOT</spigot.version>
+        <spigot.version>1.21.1-R0.1-SNAPSHOT</spigot.version> 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -19,6 +22,10 @@
         <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
     </repositories>
 
@@ -29,15 +36,39 @@
             <version>${spigot.version}</version>
             <scope>provided</scope>
         </dependency>
-    </dependencies> <build>
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>${spigot.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <defaultGoal>clean package</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
+                <version>3.11.0</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
         </plugins>
