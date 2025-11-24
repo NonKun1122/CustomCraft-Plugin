@@ -28,11 +28,9 @@ public class CustomRecipe {
     public ItemStack getResult() { return result; }
     
     public void setName(String name) { this.name = name; }
-    // เมท็อดสำหรับ Admin เพื่ออัปเดตข้อมูล
     public void setIngredients(List<ItemStack> ingredients) { this.ingredients = ingredients; }
     public void setResult(ItemStack result) { this.result = result; }
     
-    // ตรวจสอบความถูกต้องของส่วนผสม
     public boolean matches(ItemStack[] inputItems) {
         if (inputItems.length != 12) return false;
         
@@ -40,13 +38,11 @@ public class CustomRecipe {
             ItemStack required = ingredients.get(i);
             ItemStack given = inputItems[i];
             
-            // ตรวจสอบว่าไอเท็มที่ผู้เล่นใส่ตรงกับที่กำหนดไว้ในสูตรหรือไม่ (ไม่สนจำนวน)
             if (required != null && required.getType() != org.bukkit.Material.AIR) {
                 if (given == null || !required.isSimilar(given) || given.getAmount() < required.getAmount()) {
                      return false; 
                 }
             } else if (given != null && given.getType() != org.bukkit.Material.AIR) {
-                // ถ้าสูตรไม่ต้องการอะไรในช่องนี้ แต่ผู้เล่นใส่
                 return false;
             }
         }
