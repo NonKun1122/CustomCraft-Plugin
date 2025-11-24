@@ -1,4 +1,4 @@
-package nonkungch.customcraft;
+package com.nonkungch.customcraft; 
 
 import nonkungch.customcraft.command.AdminRecipeCommand;
 import nonkungch.customcraft.command.PlayerCraftCommand;
