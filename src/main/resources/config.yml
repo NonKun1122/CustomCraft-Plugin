@@ -1,0 +1,10 @@
+
+# CustomCraft Configuration File
+
+# ตัวอย่างการตั้งค่าความล่าช้าในการคราฟต์ (เป็นวินาที)
+crafting-delay: 5
+
+messages:
+  no-permission: "&cคุณไม่มีสิทธิ์ใช้คำสั่งนี้"
+  admin-menu-title: "&4[Admin] Custom Recipes"
+  
