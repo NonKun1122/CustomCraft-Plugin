@@ -1,6 +1,6 @@
-name: CustomCraft
+name: CustomCraft-Plugin
 version: 1.0
-main: nonkungch.customcraft.CustomCraft
+main: com.nonkungch.customcraft.CustomCraft
 author: nonkungch
 api-version: 1.13
 
