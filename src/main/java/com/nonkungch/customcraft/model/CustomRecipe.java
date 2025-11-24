@@ -1,4 +1,4 @@
-package nonkungch.customcraft.model;
+package com.nonkungch.customcraft.model;
 
 import org.bukkit.inventory.ItemStack;
 import java.util.List;
