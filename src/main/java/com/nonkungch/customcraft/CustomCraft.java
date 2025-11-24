@@ -1,3 +1,5 @@
+// src/main/java/com/nonkungch/customcraft/CustomCraft.java
+
 package com.nonkungch.customcraft;
 
 import com.nonkungch.customcraft.command.AdminRecipeCommand;
@@ -24,6 +26,7 @@ public class CustomCraft extends JavaPlugin {
         this.getCommand("customcraft").setExecutor(new PlayerCraftCommand(this));
         this.getCommand("ccadmin").setExecutor(new AdminRecipeCommand(this));
         
+        // ควรใช้ Paper API สำหรับ Listener ในเวอร์ชันใหม่
         Bukkit.getPluginManager().registerEvents(new GUIHandler(this), this);
         
         RecipeRemover.removeVanillaRecipes(this); 
@@ -33,6 +36,8 @@ public class CustomCraft extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        // เมื่อปิดปลั๊กอิน ควรถอดสูตรคราฟต์ที่เพิ่มเข้าไปในระบบของ Bukkit ออก
+        recipeManager.unregisterBukkitRecipes(); 
         recipeManager.saveRecipes();
         getLogger().info("[CustomCraft] Plugin Disabled.");
     }
