@@ -1,8 +1,8 @@
 package com.nonkungch.customcraft.manager;
 
-import com.nonkungch.customcraft.CustomCraft;
+import com.nonkungch.customcraft.CustomCraft; 
 import com.nonkungch.customcraft.model.CustomRecipe;
-import vom.nonkungch.customcraft.util.ItemSerializer;
+import com.nonkungch.customcraft.util.ItemSerializer; 
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import java.io.File;
@@ -11,11 +11,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class RecipeManager {
-    private final CustomCraft plugin;
+    private final CustomCraft plugin; 
     private final Map<String, CustomRecipe> recipes = new HashMap<>();
     private final File recipeFile;
 
-    public RecipeManager(CustomCraft plugin) {
+    public RecipeManager(CustomCraft plugin) { 
         this.plugin = plugin;
         this.recipeFile = new File(plugin.getDataFolder(), "recipes.yml");
     }
@@ -28,10 +28,10 @@ public class RecipeManager {
         
         for (String id : recipeConfig.getKeys(false)) {
             String name = recipeConfig.getString(id + ".name", "Untitled Recipe");
-            ItemStack result = ItemSerializer.deserialize(recipeConfig.getString(id + ".result"));
+            ItemStack result = ItemSerializer.deserialize(recipeConfig.getString(id + ".result")); 
             
             List<ItemStack> ingredients = recipeConfig.getStringList(id + ".ingredients").stream()
-                                            .map(ItemSerializer::deserialize)
+                                            .map(ItemSerializer::deserialize) 
                                             .collect(Collectors.toList());
             
             recipes.put(id, new CustomRecipe(id, name, ingredients, result));
@@ -64,5 +64,4 @@ public class RecipeManager {
     public void removeRecipe(String identifier) { recipes.remove(identifier); }
     public Collection<CustomRecipe> getRecipes() { return recipes.values(); }
     public CustomRecipe getRecipe(String id) { return recipes.get(id); }
-                        }
-          
+}
