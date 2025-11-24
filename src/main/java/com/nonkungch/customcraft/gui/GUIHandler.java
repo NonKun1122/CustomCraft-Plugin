@@ -1,8 +1,8 @@
-package nonkungch.customcraft.gui;
+package com.nonkungch.customcraft.gui;
 
-import nonkungch.customcraft.CustomCraft;
-import nonkungch.customcraft.model.CustomRecipe;
-import nonkungch.customcraft.util.ChatUtil;
+import com.nonkungch.customcraft.CustomCraft;
+import com.nonkungch.customcraft.model.CustomRecipe;
+import com.nonkungch.customcraft.util.ChatUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
