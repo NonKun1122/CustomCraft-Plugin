@@ -1,6 +1,6 @@
 package com.nonkungch.customcraft.util;
 
-import nonkungch.customcraft.CustomCraft;
+import com.nonkungch.customcraft.CustomCraft;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Recipe;
 import java.util.Iterator;
