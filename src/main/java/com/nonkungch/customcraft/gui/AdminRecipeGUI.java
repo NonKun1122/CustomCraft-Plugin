@@ -1,6 +1,6 @@
-package nonkungch.customcraft.gui;
+package com.nonkungch.customcraft.gui;
 
-import nonkungch.customcraft.model.CustomRecipe;
+import com.nonkungch.customcraft.model.CustomRecipe;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
