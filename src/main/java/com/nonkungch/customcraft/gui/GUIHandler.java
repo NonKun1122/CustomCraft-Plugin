@@ -54,12 +54,14 @@ public class GUIHandler implements Listener {
             }
         }
         
-        // 2. GUI รายละเอียดการคราฟต์ (Recipe Detail GUI)
+        // 2. GUI รายละเอียดการคราฟต์ (Recipe Detail GUI - ผู้เล่น)
         if (title.startsWith(PlayerCraftingGUI.DETAIL_TITLE_PREFIX)) {
+            // อนุญาตให้คลิกได้เฉพาะในช่อง Input (10, 11, 12, ...)
             if (!Arrays.asList(PlayerCraftingGUI.INPUT_SLOTS).contains(event.getSlot())) {
                 event.setCancelled(true);
             }
             
+            // Logic ปุ่ม Craft
             if (event.getSlot() == PlayerCraftingGUI.CRAFT_BUTTON_SLOT && currentItem != null && currentItem.getType() == Material.LIME_STAINED_GLASS_PANE) {
                 event.setCancelled(true);
                 String recipeName = title.substring(PlayerCraftingGUI.DETAIL_TITLE_PREFIX.length());
@@ -75,31 +77,43 @@ public class GUIHandler implements Listener {
         // 3. GUI แอดมิน (Admin Recipe List)
         if (title.equals(AdminRecipeGUI.ADMIN_MENU_TITLE)) {
             event.setCancelled(true);
+            // โค้ดสำหรับเลือกสูตรเพื่อแก้ไข หรือกดปุ่ม New Recipe
         }
 
-        // 4. GUI แอดมิน (Admin Edit Menu)
+        // 4. GUI แอดมิน (Admin Edit Menu) ⭐️ โค้ดที่แก้ไขบั๊กการคลิก ⭐️
         if (title.startsWith(AdminRecipeGUI.EDIT_TITLE_PREFIX)) {
-            if (!Arrays.asList(AdminRecipeGUI.EDIT_INPUT_SLOTS).contains(event.getSlot()) && 
-                event.getSlot() != AdminRecipeGUI.EDIT_OUTPUT_SLOT) {
-                
-                event.setCancelled(true);
-                if (currentItem == null) return;
+            
+            // 4a. ถ้าคลิกใน Inventory ของผู้เล่น (ด้านล่าง): อนุญาตให้ทำได้
+            if (event.getClickedInventory() != null && event.getClickedInventory().equals(player.getInventory())) {
+                return;
+            }
+            
+            // 4b. ถ้าคลิกในช่อง Input (ส่วนผสม) หรือ Output (ผลลัพธ์) ของ GUI: อนุญาตให้ทำได้
+            if (Arrays.asList(AdminRecipeGUI.EDIT_INPUT_SLOTS).contains(event.getSlot()) || 
+                event.getSlot() == AdminRecipeGUI.EDIT_OUTPUT_SLOT) {
+                return;
+            }
 
-                String recipeName = title.substring(AdminRecipeGUI.EDIT_TITLE_PREFIX.length());
-                CustomRecipe recipe = plugin.getRecipeManager().getRecipes().stream()
-                        .filter(r -> r.getName().equals(recipeName))
-                        .findFirst().orElse(null);
+            // 4c. ถ้าคลิกในช่องอื่นๆ ใน Top Inventory (ปุ่มควบคุม, กรอบ, ช่องว่าง): ยกเลิกการคลิก
+            event.setCancelled(true);
+            
+            if (currentItem == null) return;
 
-                if (recipe == null && !recipeName.contains("Temp")) return; 
+            String recipeName = title.substring(AdminRecipeGUI.EDIT_TITLE_PREFIX.length());
+            CustomRecipe recipe = plugin.getRecipeManager().getRecipes().stream()
+                    .filter(r -> r.getName().equals(recipeName))
+                    .findFirst().orElse(null);
 
-                if (event.getSlot() == AdminRecipeGUI.BUTTON_SAVE) {
-                    handleAdminSave(player, inv, recipe);
-                } else if (event.getSlot() == AdminRecipeGUI.BUTTON_DELETE) {
-                    handleAdminDelete(player, recipe);
-                } else if (event.getSlot() == AdminRecipeGUI.BUTTON_RENAME) {
-                    ChatUtil.sendMessage(player, "&eโปรดพิมพ์ชื่อสูตรใหม่ลงในแชท.");
-                    player.closeInventory();
-                }
+            // ใช้ชื่อชั่วคราว "Temp" เพื่อให้สามารถบันทึกสูตรใหม่ได้
+            if (recipe == null && !recipeName.contains("Temp")) return; 
+
+            if (event.getSlot() == AdminRecipeGUI.BUTTON_SAVE) {
+                handleAdminSave(player, inv, recipe);
+            } else if (event.getSlot() == AdminRecipeGUI.BUTTON_DELETE) {
+                handleAdminDelete(player, recipe);
+            } else if (event.getSlot() == AdminRecipeGUI.BUTTON_RENAME) {
+                ChatUtil.sendMessage(player, "&eโปรดพิมพ์ชื่อสูตรใหม่ลงในแชท.");
+                player.closeInventory();
             }
         }
     }
@@ -158,13 +172,15 @@ public class GUIHandler implements Listener {
     }
 
     private void handleAdminSave(Player player, Inventory inv, CustomRecipe recipe) {
+        // ดึงไอเท็มจากช่อง Input 12 ช่องที่แอดมินใส่ไว้
         List<ItemStack> ingredients = Arrays.stream(AdminRecipeGUI.EDIT_INPUT_SLOTS)
                                     .map(inv::getItem)
                                     .collect(Collectors.toList());
         
+        // ดึงไอเท็มจากช่อง Output 1 ช่อง
         ItemStack result = inv.getItem(AdminRecipeGUI.EDIT_OUTPUT_SLOT);
         
-        if (result == null) {
+        if (result == null || result.getType() == Material.AIR) {
             ChatUtil.sendMessage(player, "&cต้องกำหนดไอเท็มผลลัพธ์ในการคราฟต์!");
             return;
         }
@@ -173,8 +189,12 @@ public class GUIHandler implements Listener {
         recipe.setResult(result);
         
         if (plugin.getRecipeManager().getRecipe(recipe.getIdentifier()) == null) {
+            // สูตรใหม่
             recipe.setName("New Custom Recipe");
             plugin.getRecipeManager().addRecipe(recipe);
+        } else {
+            // อัปเดตสูตรเดิม
+            plugin.getRecipeManager().updateBukkitRecipe(recipe); 
         }
         
         ChatUtil.sendMessage(player, "&aบันทึกสูตร '" + recipe.getName() + "' เรียบร้อยแล้ว.");
@@ -198,6 +218,7 @@ public class GUIHandler implements Listener {
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         UUID playerID = event.getPlayer().getUniqueId();
+        // ยกเลิกการคราฟต์ที่กำลังดำเนินอยู่ หากผู้เล่นปิดเมนู
         if (craftingTasks.containsKey(playerID)) {
             craftingTasks.get(playerID).cancel();
             craftingTasks.remove(playerID);
