@@ -1,6 +1,20 @@
-name: RealisticFire
+name: CustomCraft
 version: 1.0
-main: com.nonkungch.realisticfire.RealisticFire
-api-version: 1.21
-author: NonKungCh
-description: Makes fire sources extinguish in the rain.
+main: nonkungch.customcraft.CustomCraft
+author: nonkungch
+api-version: 1.13
+
+commands:
+  customcraft:
+    description: Opens the custom crafting menu.
+    aliases: [cc]
+    usage: /customcraft
+  ccadmin:
+    description: Administration command for custom recipes.
+    permission: customcraft.admin
+    usage: /ccadmin [new]
+
+permissions:
+  customcraft.admin:
+    description: Allows access to the custom recipe administration menu.
+    default: op
