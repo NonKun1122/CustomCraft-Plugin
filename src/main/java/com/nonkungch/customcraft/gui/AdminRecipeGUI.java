@@ -59,7 +59,8 @@ public class AdminRecipeGUI {
         }
         
         for (int i = 0; i < EDIT_INPUT_SLOTS.length; i++) {
-            gui.setItem(EDIT_INPUT_SLOTS[i], recipe.getIngredients().get(i));
+            ItemStack ingredient = recipe.getIngredients().size() > i ? recipe.getIngredients().get(i) : null;
+            gui.setItem(EDIT_INPUT_SLOTS[i], ingredient);
         }
         gui.setItem(EDIT_OUTPUT_SLOT, recipe.getResult());
         
@@ -90,7 +91,8 @@ public class AdminRecipeGUI {
     }
 
     public static List<ItemStack> createEmptyIngredientList() {
-        return Arrays.asList(new ItemStack[12]);
+        ItemStack[] emptyArray = new ItemStack[12];
+        Arrays.fill(emptyArray, null);
+        return Arrays.asList(emptyArray);
     }
-              }
-          
+}
