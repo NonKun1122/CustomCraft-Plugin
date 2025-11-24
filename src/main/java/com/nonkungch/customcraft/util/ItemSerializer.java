@@ -1,4 +1,4 @@
-package nonkungch.customcraft.util;
+package com.nonkungch.customcraft.util;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
