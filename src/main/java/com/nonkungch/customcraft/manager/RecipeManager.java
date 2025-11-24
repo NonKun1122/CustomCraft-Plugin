@@ -1,8 +1,8 @@
-package nonkungch.customcraft.manager;
+package com.nonkungch.customcraft.manager;
 
-import nonkungch.customcraft.CustomCraft;
-import nonkungch.customcraft.model.CustomRecipe;
-import nonkungch.customcraft.util.ItemSerializer;
+import com.nonkungch.customcraft.CustomCraft;
+import com.nonkungch.customcraft.model.CustomRecipe;
+import vom.nonkungch.customcraft.util.ItemSerializer;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import java.io.File;
