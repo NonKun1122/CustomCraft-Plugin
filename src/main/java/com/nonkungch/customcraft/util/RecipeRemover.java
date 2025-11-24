@@ -1,4 +1,4 @@
-package nonkungch.customcraft.util;
+package com.nonkungch.customcraft.util;
 
 import nonkungch.customcraft.CustomCraft;
 import org.bukkit.Bukkit;
