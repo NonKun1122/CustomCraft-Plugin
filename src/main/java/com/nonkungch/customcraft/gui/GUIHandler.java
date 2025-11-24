@@ -56,7 +56,7 @@ public class GUIHandler implements Listener {
         
         // 2. GUI รายละเอียดการคราฟต์ (Recipe Detail GUI - ผู้เล่น)
         if (title.startsWith(PlayerCraftingGUI.DETAIL_TITLE_PREFIX)) {
-            // อนุญาตให้คลิกได้เฉพาะในช่อง Input (10, 11, 12, ...)
+            // อนุญาตให้คลิกได้เฉพาะในช่อง Input
             if (!Arrays.asList(PlayerCraftingGUI.INPUT_SLOTS).contains(event.getSlot())) {
                 event.setCancelled(true);
             }
@@ -74,13 +74,37 @@ public class GUIHandler implements Listener {
             }
         }
         
-        // 3. GUI แอดมิน (Admin Recipe List)
+        // 3. GUI แอดมิน (Admin Recipe List) ⭐️ แก้ไข: เพิ่ม Logic การคลิกปุ่มและสูตร
         if (title.equals(AdminRecipeGUI.ADMIN_MENU_TITLE)) {
             event.setCancelled(true);
-            // โค้ดสำหรับเลือกสูตรเพื่อแก้ไข หรือกดปุ่ม New Recipe
+            if (currentItem == null || currentItem.getType() == Material.AIR) return;
+            
+            // 3a. คลิกปุ่ม "Add New Recipe" (NETHER_STAR)
+            if (currentItem.getType() == Material.NETHER_STAR) {
+                CustomRecipe newRecipe = new CustomRecipe(
+                    "New Recipe (Temp)", 
+                    AdminRecipeGUI.createEmptyIngredientList(), 
+                    new ItemStack(Material.BOOK)
+                );
+                AdminRecipeGUI.openEditGUI(player, newRecipe, true);
+                return;
+            }
+            
+            // 3b. คลิกเพื่อแก้ไขสูตรเดิม
+            if (currentItem.hasItemMeta() && currentItem.getItemMeta().hasLore()) {
+                List<String> lore = currentItem.getItemMeta().getLore();
+                String idLine = lore.stream().filter(line -> line.contains("ID:")).findFirst().orElse(null);
+                if (idLine != null) {
+                    String id = idLine.split("ID: ")[1].trim();
+                    CustomRecipe recipe = plugin.getRecipeManager().getRecipe(id);
+                    if (recipe != null) {
+                        AdminRecipeGUI.openEditGUI(player, recipe, false);
+                    }
+                }
+            }
         }
 
-        // 4. GUI แอดมิน (Admin Edit Menu) ⭐️ โค้ดที่แก้ไขบั๊กการคลิก ⭐️
+        // 4. GUI แอดมิน (Admin Edit Menu)
         if (title.startsWith(AdminRecipeGUI.EDIT_TITLE_PREFIX)) {
             
             // 4a. ถ้าคลิกใน Inventory ของผู้เล่น (ด้านล่าง): อนุญาตให้ทำได้
@@ -190,7 +214,8 @@ public class GUIHandler implements Listener {
         
         if (plugin.getRecipeManager().getRecipe(recipe.getIdentifier()) == null) {
             // สูตรใหม่
-            recipe.setName("New Custom Recipe");
+            // Note: identifier ถูกสร้างแล้วใน constructor ของ CustomRecipe (UUID) 
+            recipe.setName("New Custom Recipe"); 
             plugin.getRecipeManager().addRecipe(recipe);
         } else {
             // อัปเดตสูตรเดิม
