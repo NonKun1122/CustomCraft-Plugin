@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent; 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class GUIHandler implements Listener {
     private final CustomCraft plugin; 
     private final Map<UUID, BukkitTask> craftingTasks = new HashMap<>(); 
+    private final Map<UUID, String> renamingRecipes = new HashMap<>(); // สำหรับเก็บสถานะตั้งชื่อสูตร
 
     public GUIHandler(CustomCraft plugin) { 
         this.plugin = plugin;
@@ -56,7 +58,7 @@ public class GUIHandler implements Listener {
         
         // 2. GUI รายละเอียดการคราฟต์ (Recipe Detail GUI - ผู้เล่น)
         if (title.startsWith(PlayerCraftingGUI.DETAIL_TITLE_PREFIX)) {
-            // อนุญาตให้คลิกได้เฉพาะในช่อง Input
+            // อนุญาตให้คลิกได้เฉพาะในช่อง Input 
             if (!Arrays.asList(PlayerCraftingGUI.INPUT_SLOTS).contains(event.getSlot())) {
                 event.setCancelled(true);
             }
@@ -74,7 +76,7 @@ public class GUIHandler implements Listener {
             }
         }
         
-        // 3. GUI แอดมิน (Admin Recipe List) ⭐️ แก้ไข: เพิ่ม Logic การคลิกปุ่มและสูตร
+        // 3. GUI แอดมิน (Admin Recipe List) - จัดการคลิกเพื่อสร้าง/แก้ไขสูตร
         if (title.equals(AdminRecipeGUI.ADMIN_MENU_TITLE)) {
             event.setCancelled(true);
             if (currentItem == null || currentItem.getType() == Material.AIR) return;
@@ -104,15 +106,15 @@ public class GUIHandler implements Listener {
             }
         }
 
-        // 4. GUI แอดมิน (Admin Edit Menu)
+        // 4. GUI แอดมิน (Admin Edit Menu) - จัดการคลิกเพื่อใส่ไอเท็มและควบคุม
         if (title.startsWith(AdminRecipeGUI.EDIT_TITLE_PREFIX)) {
             
-            // 4a. ถ้าคลิกใน Inventory ของผู้เล่น (ด้านล่าง): อนุญาตให้ทำได้
+            // 4a. ถ้าคลิกใน Inventory ของผู้เล่น (ด้านล่าง): อนุญาตให้ทำได้ (ย้ายไอเท็มจากตัว)
             if (event.getClickedInventory() != null && event.getClickedInventory().equals(player.getInventory())) {
                 return;
             }
             
-            // 4b. ถ้าคลิกในช่อง Input (ส่วนผสม) หรือ Output (ผลลัพธ์) ของ GUI: อนุญาตให้ทำได้
+            // 4b. ถ้าคลิกในช่อง Input (ส่วนผสม) หรือ Output (ผลลัพธ์) ของ GUI: อนุญาตให้ทำได้ (วางไอเท็ม)
             if (Arrays.asList(AdminRecipeGUI.EDIT_INPUT_SLOTS).contains(event.getSlot()) || 
                 event.getSlot() == AdminRecipeGUI.EDIT_OUTPUT_SLOT) {
                 return;
@@ -128,7 +130,7 @@ public class GUIHandler implements Listener {
                     .filter(r -> r.getName().equals(recipeName))
                     .findFirst().orElse(null);
 
-            // ใช้ชื่อชั่วคราว "Temp" เพื่อให้สามารถบันทึกสูตรใหม่ได้
+            // จัดการสูตรชั่วคราว
             if (recipe == null && !recipeName.contains("Temp")) return; 
 
             if (event.getSlot() == AdminRecipeGUI.BUTTON_SAVE) {
@@ -137,8 +139,42 @@ public class GUIHandler implements Listener {
                 handleAdminDelete(player, recipe);
             } else if (event.getSlot() == AdminRecipeGUI.BUTTON_RENAME) {
                 ChatUtil.sendMessage(player, "&eโปรดพิมพ์ชื่อสูตรใหม่ลงในแชท.");
+                renamingRecipes.put(player.getUniqueId(), recipe.getIdentifier()); // ⭐️ บันทึกสถานะ
                 player.closeInventory();
             }
+        }
+    }
+    
+    // ⭐️⭐️ จัดการเมื่อผู้เล่นพิมพ์ในแชทเพื่อเปลี่ยนชื่อ (แก้บั๊ก UI หาย) ⭐️⭐️
+    @EventHandler
+    public void onPlayerChat(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+        UUID playerID = player.getUniqueId();
+        
+        if (renamingRecipes.containsKey(playerID)) {
+            event.setCancelled(true); // ป้องกันข้อความชื่อสูตรไม่ให้แสดงในแชท
+            String newName = event.getMessage().trim();
+            String recipeID = renamingRecipes.remove(playerID); // ลบสถานะทันที
+            
+            // ต้องรันบน Main thread
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                CustomRecipe recipe = plugin.getRecipeManager().getRecipe(recipeID);
+                
+                if (recipe == null) {
+                    ChatUtil.sendMessage(player, "&cเกิดข้อผิดพลาด: ไม่พบสูตร.");
+                    return;
+                }
+                
+                // อัปเดตชื่อ
+                recipe.setName(newName);
+                plugin.getRecipeManager().updateBukkitRecipe(recipe);
+                plugin.getRecipeManager().saveRecipes();
+                
+                ChatUtil.sendMessage(player, "&aเปลี่ยนชื่อสูตรเป็น '&f" + newName + "&a' เรียบร้อยแล้ว.");
+                
+                // เปิด GUI กลับไปที่หน้าแก้ไข
+                AdminRecipeGUI.openEditGUI(player, recipe, false); 
+            });
         }
     }
     
@@ -195,13 +231,12 @@ public class GUIHandler implements Listener {
         return true;
     }
 
+    // ⭐️⭐️ แก้ไข: จัดการการบันทึกสูตรใหม่ให้ถูกต้อง (แก้บั๊กเซฟไม่ทำงาน) ⭐️⭐️
     private void handleAdminSave(Player player, Inventory inv, CustomRecipe recipe) {
-        // ดึงไอเท็มจากช่อง Input 12 ช่องที่แอดมินใส่ไว้
         List<ItemStack> ingredients = Arrays.stream(AdminRecipeGUI.EDIT_INPUT_SLOTS)
                                     .map(inv::getItem)
                                     .collect(Collectors.toList());
         
-        // ดึงไอเท็มจากช่อง Output 1 ช่อง
         ItemStack result = inv.getItem(AdminRecipeGUI.EDIT_OUTPUT_SLOT);
         
         if (result == null || result.getType() == Material.AIR) {
@@ -213,17 +248,18 @@ public class GUIHandler implements Listener {
         recipe.setResult(result);
         
         if (plugin.getRecipeManager().getRecipe(recipe.getIdentifier()) == null) {
-            // สูตรใหม่
-            // Note: identifier ถูกสร้างแล้วใน constructor ของ CustomRecipe (UUID) 
-            recipe.setName("New Custom Recipe"); 
-            plugin.getRecipeManager().addRecipe(recipe);
+            // ถ้าเป็นสูตรใหม่ (ที่ถูกสร้างชั่วคราว)
+            if (recipe.getName().contains("Temp")) {
+                 recipe.setName("New Custom Recipe");
+            }
+            plugin.getRecipeManager().addRecipe(recipe); // บันทึกสูตรใหม่เข้า Map และลงทะเบียน
         } else {
             // อัปเดตสูตรเดิม
             plugin.getRecipeManager().updateBukkitRecipe(recipe); 
         }
         
         ChatUtil.sendMessage(player, "&aบันทึกสูตร '" + recipe.getName() + "' เรียบร้อยแล้ว.");
-        plugin.getRecipeManager().saveRecipes();
+        plugin.getRecipeManager().saveRecipes(); // บันทึกข้อมูลลงไฟล์
         player.closeInventory();
     }
 
@@ -243,11 +279,18 @@ public class GUIHandler implements Listener {
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         UUID playerID = event.getPlayer().getUniqueId();
-        // ยกเลิกการคราฟต์ที่กำลังดำเนินอยู่ หากผู้เล่นปิดเมนู
+        
+        // ยกเลิกการคราฟต์ที่กำลังดำเนินอยู่
         if (craftingTasks.containsKey(playerID)) {
             craftingTasks.get(playerID).cancel();
             craftingTasks.remove(playerID);
             ChatUtil.sendMessage((Player) event.getPlayer(), "&cการคราฟต์ถูกยกเลิก (ปิดเมนู).");
+        }
+        
+        // ลบสถานะการตั้งชื่อ หากผู้เล่นปิดเมนูโดยไม่ตั้งชื่อ
+        if (renamingRecipes.containsKey(playerID)) {
+             renamingRecipes.remove(playerID);
+             ChatUtil.sendMessage((Player) event.getPlayer(), "&eการตั้งชื่อสูตรถูกยกเลิก.");
         }
     }
 }
