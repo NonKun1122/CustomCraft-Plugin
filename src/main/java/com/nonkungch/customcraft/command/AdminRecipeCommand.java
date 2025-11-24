@@ -1,21 +1,19 @@
-package nonkungch.customcraft.command;
+package com.nonkungch.customcraft.command;
 
-import nonkungch.customcraft.CustomCraft;
-import nonkungch.customcraft.gui.AdminRecipeGUI;
-import nonkungch.customcraft.model.CustomRecipe;
-import nonkungch.customcraft.util.ChatUtil;
+import com.nonkungch.customcraft.CustomCraft; 
+import com.nonkungch.customcraft.gui.AdminRecipeGUI;
+import com.nonkungch.customcraft.model.CustomRecipe;
+import com.nonkungch.customcraft.util.ChatUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Collections;
-
 public class AdminRecipeCommand implements CommandExecutor {
-    private final CustomCraft plugin;
+    private final CustomCraft plugin; 
 
-    public AdminRecipeCommand(CustomCraft plugin) {
+    public AdminRecipeCommand(CustomCraft plugin) { 
         this.plugin = plugin;
     }
 
@@ -46,4 +44,4 @@ public class AdminRecipeCommand implements CommandExecutor {
         ChatUtil.sendMessage(player, "&cการใช้งาน: /ccadmin [new]");
         return true;
     }
-          }
+}
