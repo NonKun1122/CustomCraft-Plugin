@@ -1,4 +1,4 @@
-package nonkungch.customcraft.util;
+package com.nonkungch.customcraft.util;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
