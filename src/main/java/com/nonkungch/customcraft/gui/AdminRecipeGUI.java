@@ -14,37 +14,58 @@ import java.util.Collection;
 import java.util.List;
 
 public class AdminRecipeGUI {
-    // ชื่อเมนู
+
+    // ================================
+    // GUI Titles
+    // ================================
     public static final String ADMIN_MENU_TITLE = ChatColor.RED + "Admin: Recipe List";
     public static final String EDIT_TITLE_PREFIX = ChatColor.DARK_RED + "Admin Edit: ";
-    
-    // ตำแหน่ง Slot สำหรับส่วนผสม (4 แถว x 3 คอลัมน์)
-    public static final Integer[] EDIT_INPUT_SLOTS = {10, 11, 12, 19, 20, 21, 28, 29, 30, 37, 38, 39}; 
-    // ตำแหน่ง Slot สำหรับผลลัพธ์
-    public static final int EDIT_OUTPUT_SLOT = 24; 
-    
-    // ตำแหน่งปุ่มควบคุม
+
+    // ================================
+    // Input / Output slots (4x3 grid = 12 items)
+    // ================================
+    public static final Integer[] EDIT_INPUT_SLOTS = {
+            10, 11, 12,
+            19, 20, 21,
+            28, 29, 30,
+            37, 38, 39
+    };
+
+    public static final int EDIT_OUTPUT_SLOT = 24;
+
+    // ================================
+    // Control Buttons
+    // ================================
     public static final int BUTTON_SAVE = 47;
     public static final int BUTTON_RENAME = 49;
     public static final int BUTTON_DELETE = 51;
-    
-    /**
-     * เปิดเมนูแสดงรายการสูตรสำหรับผู้ดูแลระบบ
-     * @param player ผู้เล่นที่เปิดเมนู
-     * @param recipes รายการสูตรทั้งหมด
-     */
+
+    // ปุ่ม Add New อยู่ในหน้า Admin Menu ตรงกลาง
+    public static final int BUTTON_ADD_NEW = 49;
+
+    // ================================
+    // Admin Menu – Recipe List
+    // ================================
     public static void openAdminMenu(Player player, Collection<CustomRecipe> recipes) {
+
         Inventory gui = Bukkit.createInventory(player, 54, ADMIN_MENU_TITLE);
-        
-        // ปุ่ม Add New Recipe (ตำแหน่งตรงกลางแถวล่าง)
-        gui.setItem(BUTTON_RENAME, createAdminMenuItem(Material.NETHER_STAR, ChatColor.GREEN + "§lAdd New Recipe", ChatColor.YELLOW + "Click to create a new recipe."));
-        
+
+        // ปุ่ม Create new recipe
+        gui.setItem(BUTTON_ADD_NEW, createItem(
+                Material.NETHER_STAR,
+                ChatColor.GREEN + "§lAdd New Recipe",
+                List.of(ChatColor.YELLOW + "Click to create a new recipe.")
+        ));
+
         int slot = 0;
+
         for (CustomRecipe recipe : recipes) {
-            if (slot >= 45) break; // จำกัดสูตรไม่เกิน 45 ช่อง
-            
-            // ใช้ไอเท็มผลลัพธ์ในการแสดงสูตร
-            ItemStack item = recipe.getResult() != null ? recipe.getResult().clone() : new ItemStack(Material.BOOK);
+            if (slot >= 45) break; // แถวบน 5 แถวเท่านั้น
+
+            ItemStack item = recipe.getResult() != null
+                    ? recipe.getResult().clone()
+                    : new ItemStack(Material.BOOK);
+
             ItemMeta meta = item.getItemMeta();
             meta.setDisplayName(ChatColor.AQUA + "§l" + recipe.getName());
             meta.setLore(List.of(
@@ -52,86 +73,99 @@ public class AdminRecipeGUI {
                     ChatColor.GRAY + "Click to edit this recipe."
             ));
             item.setItemMeta(meta);
-            
+
             gui.setItem(slot++, item);
         }
-        
+
         player.openInventory(gui);
-    }
-    
-    /**
-     * เปิดเมนูแก้ไขสูตรเฉพาะ (Edit/Create)
-     * @param player ผู้เล่นที่เปิดเมนู
-     * @param recipe สูตรที่ต้องการแก้ไข
-     * @param isNew เป็นสูตรใหม่หรือไม่ (เพื่อซ่อนปุ่ม Delete)
-     */
-    public static void openEditGUI(Player player, CustomRecipe recipe, boolean isNew) {
-        // ชื่อเมนูจะมีชื่อสูตรต่อท้าย เช่น "Admin Edit: New Recipe (Temp)"
-        Inventory gui = Bukkit.createInventory(player, 54, EDIT_TITLE_PREFIX + recipe.getName());
-        
-        ItemStack border = createBorderItem(Material.BLACK_STAINED_GLASS_PANE, " ");
-        
-        // วางกรอบและปุ่ม
-        for (int i = 0; i < 54; i++) {
-            // เว้นช่องสำหรับ Input, Output และปุ่มควบคุม
-            if (!Arrays.asList(EDIT_INPUT_SLOTS).contains(i) && i != EDIT_OUTPUT_SLOT && 
-                i != BUTTON_SAVE && i != BUTTON_RENAME && i != BUTTON_DELETE) {
-                gui.setItem(i, border);
-            }
-        }
-        
-        // วางส่วนผสม (Input Slots)
-        for (int i = 0; i < EDIT_INPUT_SLOTS.length; i++) {
-            ItemStack ingredient = recipe.getIngredients().size() > i ? recipe.getIngredients().get(i) : null;
-            gui.setItem(EDIT_INPUT_SLOTS[i], ingredient);
-        }
-        
-        // วางผลลัพธ์ (Output Slot)
-        gui.setItem(EDIT_OUTPUT_SLOT, recipe.getResult());
-        
-        // ปุ่ม Save
-        gui.setItem(BUTTON_SAVE, createAdminMenuItem(Material.LIME_STAINED_GLASS_PANE, ChatColor.GREEN + "§lSAVE RECIPE", ChatColor.GRAY + "บันทึกสูตรนี้"));
-        
-        // ปุ่ม Rename (ใช้ปุ่มตรงกลาง)
-        gui.setItem(BUTTON_RENAME, createAdminMenuItem(Material.NAME_TAG, ChatColor.YELLOW + "§lRENAME", ChatColor.GRAY + "เปลี่ยนชื่อสูตร"));
-        
-        // ปุ่ม Delete (แสดงเฉพาะเมื่อไม่ใช่สูตรใหม่)
-        if (!isNew) {
-            gui.setItem(BUTTON_DELETE, createAdminMenuItem(Material.RED_STAINED_GLASS_PANE, ChatColor.RED + "§lDELETE RECIPE", ChatColor.GRAY + "ลบสูตรนี้อย่างถาวร"));
-        }
-        
-        player.openInventory(gui);
-    }
-    
-    /**
-     * Helper Method สำหรับสร้างปุ่มควบคุม/เมนู
-     */
-    public static ItemStack createAdminMenuItem(Material material, String name, String loreLine) {
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(name);
-        meta.setLore(List.of(loreLine));
-        item.setItemMeta(meta);
-        return item;
-    }
-    
-    /**
-     * Helper Method สำหรับสร้าง Item กรอบ (Border)
-     */
-    private static ItemStack createBorderItem(Material material, String name) {
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(name);
-        item.setItemMeta(meta);
-        return item;
     }
 
-    /**
-     * สร้าง List ของ ItemStack ว่างเปล่า 12 ช่อง สำหรับสูตรใหม่
-     */
+    // ================================
+    // Edit GUI – เปิดแก้ไขสูตร
+    // ================================
+    public static void openEditGUI(Player player, CustomRecipe recipe, boolean isNew) {
+
+        Inventory gui = Bukkit.createInventory(player, 54, EDIT_TITLE_PREFIX + recipe.getName());
+
+        ItemStack border = createBorder(Material.GRAY_STAINED_GLASS_PANE);
+
+        // เติม Border ทั้ง GUI
+        for (int i = 0; i < 54; i++) {
+            gui.setItem(i, border);
+        }
+
+        // ------------------------------
+        // Section Labels (UI ป้ายบอกผู้ใช้)
+        // ------------------------------
+        gui.setItem(1, createItem(Material.PAPER, ChatColor.YELLOW + "§lIngredients", List.of("Place materials here")));
+        gui.setItem(23, createItem(Material.PAPER, ChatColor.YELLOW + "§lOutput Item", List.of("Result of crafting")));
+        gui.setItem(48, createItem(Material.PAPER, ChatColor.YELLOW + "§lControls", List.of("Save / Rename / Delete")));
+
+        // ------------------------------
+        // วางช่อง Input
+        // ------------------------------
+        for (int i = 0; i < EDIT_INPUT_SLOTS.length; i++) {
+            ItemStack ing = recipe.getIngredients().size() > i ? recipe.getIngredients().get(i) : null;
+            gui.setItem(EDIT_INPUT_SLOTS[i], ing);
+        }
+
+        // ------------------------------
+        // ช่อง Output
+        // ------------------------------
+        gui.setItem(EDIT_OUTPUT_SLOT, recipe.getResult());
+
+        // ------------------------------
+        // Buttons
+        // ------------------------------
+        gui.setItem(BUTTON_SAVE, createItem(
+                Material.LIME_STAINED_GLASS_PANE,
+                ChatColor.GREEN + "§lSAVE RECIPE",
+                List.of(ChatColor.GRAY + "บันทึกสูตรนี้")
+        ));
+
+        gui.setItem(BUTTON_RENAME, createItem(
+                Material.NAME_TAG,
+                ChatColor.YELLOW + "§lRENAME",
+                List.of(ChatColor.GRAY + "เปลี่ยนชื่อสูตร")
+        ));
+
+        if (!isNew) {
+            gui.setItem(BUTTON_DELETE, createItem(
+                    Material.RED_STAINED_GLASS_PANE,
+                    ChatColor.RED + "§lDELETE RECIPE",
+                    List.of(ChatColor.GRAY + "ลบสูตรนี้อย่างถาวร")
+            ));
+        }
+
+        player.openInventory(gui);
+    }
+
+    // ================================
+    // Helper – Create Item
+    // ================================
+    public static ItemStack createItem(Material material, String name, List<String> lore) {
+        ItemStack i = new ItemStack(material);
+        ItemMeta m = i.getItemMeta();
+        m.setDisplayName(name);
+        if (lore != null) m.setLore(lore);
+        i.setItemMeta(m);
+        return i;
+    }
+
+    // Border Item
+    private static ItemStack createBorder(Material mat) {
+        ItemStack i = new ItemStack(mat);
+        ItemMeta m = i.getItemMeta();
+        m.setDisplayName(" ");
+        i.setItemMeta(m);
+        return i;
+    }
+
+    // ================================
+    // ใช้ตอนสร้างสูตรใหม่
+    // ================================
     public static List<ItemStack> createEmptyIngredientList() {
-        ItemStack[] emptyArray = new ItemStack[12];
-        // ไม่จำเป็นต้อง Arrays.fill(emptyArray, null) เพราะ Java กำหนดค่าเริ่มต้นเป็น null อยู่แล้ว
-        return Arrays.asList(emptyArray);
+        ItemStack[] empty = new ItemStack[12]; // ทุกช่องเป็น null
+        return Arrays.asList(empty);
     }
 }
