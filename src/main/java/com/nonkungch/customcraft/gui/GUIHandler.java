@@ -181,12 +181,14 @@ public class GUIHandler implements Listener {
                 handleAdminDelete(player, recipe);
                 adminEditingSessions.remove(playerId);
             } else if (event.getSlot() == AdminRecipeGUI.BUTTON_RENAME) {
-                // ถ้า recipe ไม่มี identifier (ก็คือ session ใหม่) ให้สร้าง identifier ชั่วคราว
-                if (recipe.getIdentifier() == null || recipe.getIdentifier().isEmpty()) {
-                    recipe.setIdentifier(UUID.randomUUID().toString());
+                // เก็บ identifier ของสูตรที่กำลังแก้ไข
+                String identifier = recipe.getIdentifier();
+                if (identifier == null || identifier.isEmpty()) {
+                    ChatUtil.sendMessage(player, "&cไม่สามารถเปลี่ยนชื่อสูตรที่ยังไม่ได้บันทึกได้!");
+                    return;
                 }
                 ChatUtil.sendMessage(player, "&eโปรดพิมพ์ชื่อสูตรใหม่ลงในแชท.");
-                renamingRecipes.put(player.getUniqueId(), recipe.getIdentifier());
+                renamingRecipes.put(player.getUniqueId(), identifier);
                 // เก็บสูตรลง session เพื่อเรียกใช้งานหลัง rename
                 adminEditingSessions.put(player.getUniqueId(), recipe);
                 player.closeInventory();
@@ -198,7 +200,7 @@ public class GUIHandler implements Listener {
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
-        UUID playerID = player.getUniqueId();
+        UUID playerID = event.getPlayer().getUniqueId();
 
         if (renamingRecipes.containsKey(playerID)) {
             event.setCancelled(true); // ป้องกันข้อความชื่อสูตรไม่ให้แสดงในแชท
@@ -228,7 +230,6 @@ public class GUIHandler implements Listener {
                 }
 
                 // ถ้าเป็น session (ยังไม่บันทึก) ให้เก็บไว้ใน session (ผู้ใช้ต้องกด Save เพื่อบันทึกจริง)
-                adminEditingSessions.put(playerID, recipe);
 
                 plugin.getRecipeManager().saveRecipes(); // บันทึก (ถ้ามีการเปลี่ยนใน manager)
                 ChatUtil.sendMessage(player, "&aเปลี่ยนชื่อสูตรเป็น '&f" + newName + "&a' เรียบร้อยแล้ว.");
@@ -361,22 +362,19 @@ public class GUIHandler implements Listener {
 
         if (recipe == null) {
             // สร้างสูตรใหม่ถ้ายังไม่มี (จะมี identifier ใหม่)
-            recipe = new CustomRecipe();
-            recipe.setIdentifier(UUID.randomUUID().toString());
-            recipe.setName("New Custom Recipe");
+            recipe = new CustomRecipe("New Custom Recipe", ingredients, result);
+        } else {
+            recipe.setIngredients(ingredients);
+            recipe.setResult(result);
         }
-
-        recipe.setIngredients(ingredients);
-        recipe.setResult(result);
 
         // ถ้าเป็นสูตรใหม่ (ยังไม่มีใน manager)
         if (plugin.getRecipeManager().getRecipe(recipe.getIdentifier()) == null) {
-            // ถ้าขื่อยังเป็น Temp ให้ตั้งชื่อดีฟอลต์ (ถ้าผู้ใช้ไม่ได้ตั้ง)
+            // ถ้าชื่อยังเป็น Temp ให้ตั้งชื่อดีฟอลต์ (ถ้าผู้ใช้ไม่ได้ตั้ง)
             if (recipe.getName() == null || recipe.getName().contains("Temp")) {
                 recipe.setName("New Custom Recipe");
             }
             plugin.getRecipeManager().addRecipe(recipe);
-            plugin.getRecipeManager().registerBukkitRecipeIfNeeded(recipe); // สมมติว่ามีเมท็อดนี้ (หรือ updateBukkitRecipe)
         } else {
             // อัปเดตสูตรเดิม
             plugin.getRecipeManager().updateBukkitRecipe(recipe);
