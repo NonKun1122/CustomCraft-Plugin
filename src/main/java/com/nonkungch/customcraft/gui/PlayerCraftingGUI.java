@@ -28,15 +28,24 @@ public class PlayerCraftingGUI {
         for (CustomRecipe recipe : recipes) {
             if (slot >= 54) break;
             
-            ItemStack item = recipe.getResult() != null ? recipe.getResult().clone() : new ItemStack(Material.BOOK);
+            // ⭐️ สร้าง ItemStack ใหม่เพื่อแสดงสูตร ⭐️
+            ItemStack item = new ItemStack(Material.CRAFTING_TABLE); // ใช้ไอเท็มที่สื่อถึงสูตรคราฟต์
+            
+            // ใช้ผลลัพธ์ของสูตรเป็นไอเท็มหลักในการแสดงผล ถ้ามี
+            if (recipe.getResult() != null && recipe.getResult().getType() != Material.AIR) {
+                item = recipe.getResult().clone();
+            }
+            
             ItemMeta meta = item.getItemMeta();
             
-            List<String> lore = meta.hasLore() ? meta.getLore() : new java.util.ArrayList<>();
+            // ⭐️ ตั้งชื่อไอเท็มเป็นชื่อสูตร ⭐️
+            meta.setDisplayName(ChatColor.AQUA + "§l" + recipe.getName());
+            
+            List<String> lore = new java.util.ArrayList<>();
             lore.add(ChatColor.YELLOW + "--------------------");
             lore.add(ChatColor.GREEN + "Click to view recipe details.");
             lore.add(ChatColor.GRAY + "ID: " + recipe.getIdentifier()); 
             meta.setLore(lore);
-            meta.setDisplayName(ChatColor.AQUA + "§l" + recipe.getName());
             item.setItemMeta(meta);
             
             gui.setItem(slot++, item);
